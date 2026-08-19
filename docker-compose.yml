@@ -11,7 +11,8 @@ services:
       DB_PATH: /data/db.sqlite
       SESSIONS_DB_PATH: /data/sessions.db
       UPLOADS_DIR: /data/uploads
-      SESSION_SECRET: dev-secret-change-me
+      # Generate with: openssl rand -hex 32
+      SESSION_SECRET: "${SESSION_SECRET:?SESSION_SECRET is required, see .env.example}"
       # No TLS-terminating proxy in front of this local compose stack, so the
       # session cookie can't be marked Secure or the browser will never send
       # it back — that's what causes "logged in" UI state but 401s on every
