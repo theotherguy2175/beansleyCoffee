@@ -19,9 +19,9 @@ services:
       COOKIE_SECURE: "false"
       # These three can also be left unset and configured later from the admin
       # Settings page (stored in the DB, takes precedence over these).
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      MAKER_NOTIFICATION_EMAIL: ${MAKER_NOTIFICATION_EMAIL:-}
-      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
-      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?BOOTSTRAP_ADMIN_PASSWORD is required}
+      SMTP_USER: codycasteel2178.5@gmail.com #${SMTP_USER:-}
+      SMTP_PASS: "zqiw uunv obqw bdno" #${SMTP_PASS:-}
+      MAKER_NOTIFICATION_EMAIL: codycasteel2178.5@gmail.com #${MAKER_NOTIFICATION_EMAIL:-}
+      BOOTSTRAP_ADMIN_EMAIL: admin@admin.com #${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
+      BOOTSTRAP_ADMIN_PASSWORD: "Iycmfqt4" #${BOOTSTRAP_ADMIN_PASSWORD:?BOOTSTRAP_ADMIN_PASSWORD is required}
       BOOTSTRAP_ADMIN_NAME: Admin
