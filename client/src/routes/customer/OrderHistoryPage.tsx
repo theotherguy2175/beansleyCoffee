@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,17 +8,34 @@ import { OrderStatusBadge } from "@/components/shared/OrderStatusBadge";
 import { useCancelOrder, useMyOrders } from "@/hooks/useOrders";
 import { ApiError } from "@/lib/api";
 import { formatOrderDetails } from "@/lib/orderFormat";
+import type { ReorderState } from "@/routes/customer/OrderPage";
+import type { Order } from "@/types/api";
 
 export function OrderHistoryPage() {
   const { data: orders, isLoading } = useMyOrders();
   const cancelOrder = useCancelOrder();
+  const navigate = useNavigate();
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+
+  function handleReorder(order: Order) {
+    const reorder: ReorderState = {
+      notes: order.notes,
+      syrupNames: order.syrupNames,
+      sizeOz: order.sizeOz,
+      strengthLabel: order.strengthLabel,
+    };
+    navigate(`/order/${order.coffeeId}`, { state: { reorder } });
+  }
 
   async function handleCancel(id: number) {
+    setCancellingId(id);
     try {
       await cancelOrder.mutateAsync(id);
       toast.success("Order cancelled");
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Couldn't cancel order");
+    } finally {
+      setCancellingId(null);
     }
   }
 
@@ -57,11 +75,21 @@ export function OrderHistoryPage() {
               </div>
               <div className="flex flex-col items-end gap-2">
                 <OrderStatusBadge status={order.status} />
-                {order.status === "pending" && (
-                  <Button variant="outline" size="sm" onClick={() => handleCancel(order.id)} disabled={cancelOrder.isPending}>
-                    Cancel
+                <div className="flex gap-2">
+                  {order.status === "pending" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleCancel(order.id)}
+                      loading={cancelOrder.isPending && cancellingId === order.id}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" onClick={() => handleReorder(order)}>
+                    Reorder
                   </Button>
-                )}
+                </div>
               </div>
             </CardContent>
           </Card>

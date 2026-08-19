@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +16,13 @@ import { useSizes, useSyrups } from "@/hooks/useMenuOptions";
 import { ApiError } from "@/lib/api";
 
 const NONE = "none";
+
+export interface ReorderState {
+  notes: string | null;
+  syrupNames: string[];
+  sizeOz: number | null;
+  strengthLabel: string | null;
+}
 
 const schema = z.object({
   notes: z.string().max(500).optional(),
@@ -47,6 +54,8 @@ export function OrderPage() {
   const { coffeeId } = useParams();
   const id = Number(coffeeId);
   const navigate = useNavigate();
+  const location = useLocation();
+  const reorder = (location.state as { reorder?: ReorderState } | null)?.reorder;
   const { data: coffee, isLoading } = useCoffee(id);
   const { data: syrups } = useSyrups();
   const { data: sizes } = useSizes();
@@ -54,7 +63,16 @@ export function OrderPage() {
 
   const form = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { notes: "", pickupTime: defaultPickupTime(), syrupNames: [], sizeOz: NONE, strengthLabel: NONE },
+    defaultValues: {
+      // Reordering reuses the previous coffee's customization, but the pickup
+      // time always resets to "30 minutes from now" — the old order's pickup
+      // time is stale by definition.
+      notes: reorder?.notes ?? "",
+      pickupTime: defaultPickupTime(),
+      syrupNames: reorder?.syrupNames ?? [],
+      sizeOz: reorder?.sizeOz ? String(reorder.sizeOz) : NONE,
+      strengthLabel: reorder?.strengthLabel ?? NONE,
+    },
   });
 
   async function onSubmit(values: z.infer<typeof schema>) {
@@ -215,7 +233,7 @@ export function OrderPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={form.formState.isSubmitting} className="mt-2">
+              <Button type="submit" loading={form.formState.isSubmitting} className="mt-2">
                 Place order
               </Button>
             </form>
