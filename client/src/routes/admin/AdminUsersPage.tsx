@@ -5,6 +5,7 @@ import { Pencil, Trash2, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -71,7 +72,7 @@ function ResetPasswordDialog({ user }: { user: PublicUser }) {
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button onClick={handleSubmit} disabled={password.length < 8 || resetPassword.isPending}>
+          <Button onClick={handleSubmit} disabled={password.length < 8} loading={resetPassword.isPending}>
             Reset password
           </Button>
         </DialogFooter>
@@ -80,9 +81,7 @@ function ResetPasswordDialog({ user }: { user: PublicUser }) {
   );
 }
 
-export function AdminUsersPage() {
-  const { user: currentUser } = useAuth();
-  const { data: users, isLoading } = useUsers();
+function UserActions({ user, currentUserId }: { user: PublicUser; currentUserId: number | undefined }) {
   const deleteUser = useDeleteUser();
 
   async function handleDelete(id: number) {
@@ -93,6 +92,39 @@ export function AdminUsersPage() {
       toast.error(err instanceof ApiError ? err.message : "Couldn't delete user");
     }
   }
+
+  return (
+    <div className="flex items-center gap-1">
+      <Button variant="ghost" size="icon" asChild>
+        <Link to={`/admin/users/${user.id}/edit`}>
+          <Pencil className="size-4" />
+        </Link>
+      </Button>
+      <ResetPasswordDialog user={user} />
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size="icon" disabled={user.id === currentUserId}>
+            <Trash2 className="size-4" />
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {user.name}?</AlertDialogTitle>
+            <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDelete(user.id)}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
+export function AdminUsersPage() {
+  const { user: currentUser } = useAuth();
+  const { data: users, isLoading } = useUsers();
 
   return (
     <div className="py-6">
@@ -112,54 +144,55 @@ export function AdminUsersPage() {
       )}
 
       {!isLoading && users && (
-        <Table className="mt-6">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <>
+          {/* Mobile: cards */}
+          <div className="mt-6 flex flex-col gap-3 sm:hidden">
             {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="capitalize">
-                    {user.role}
-                  </Badge>
-                </TableCell>
-                <TableCell className="flex justify-end gap-1">
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link to={`/admin/users/${user.id}/edit`}>
-                      <Pencil className="size-4" />
-                    </Link>
-                  </Button>
-                  <ResetPasswordDialog user={user} />
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" disabled={user.id === currentUser?.id}>
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete {user.name}?</AlertDialogTitle>
-                        <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(user.id)}>Delete</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </TableCell>
-              </TableRow>
+              <Card key={user.id}>
+                <CardContent className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium">{user.name}</p>
+                      <Badge variant="secondary" className="capitalize">
+                        {user.role}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground truncate text-sm">{user.email}</p>
+                  </div>
+                  <UserActions user={user} currentUserId={currentUser?.id} />
+                </CardContent>
+              </Card>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+
+          {/* Desktop: table */}
+          <Table className="mt-6 hidden sm:table">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="capitalize">
+                      {user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="flex justify-end gap-1">
+                    <UserActions user={user} currentUserId={currentUser?.id} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </>
       )}
     </div>
   );

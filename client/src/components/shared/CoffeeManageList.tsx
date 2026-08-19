@@ -67,51 +67,60 @@ export function CoffeeManageList({ basePath }: { basePath: string }) {
 
       {coffees?.map((coffee) => (
         <Card key={coffee.id}>
-          <CardContent className="flex items-center gap-4">
-            <div className="bg-muted flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md">
-              {coffee.imagePath ? (
-                <img src={`/uploads/${coffee.imagePath}`} alt={coffee.name} className="h-full w-full object-cover" />
-              ) : (
-                <CoffeeIcon className="text-muted-foreground size-6" />
-              )}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <p className="font-medium">{coffee.name}</p>
-                {coffee.coffeeTypeName && (
-                  <Badge variant="outline" className="text-xs">
-                    {coffee.coffeeTypeName}
-                  </Badge>
+          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="flex min-w-0 flex-1 items-center gap-4">
+              <div className="bg-muted flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-md">
+                {coffee.imagePath ? (
+                  <img src={`/uploads/${coffee.imagePath}`} alt={coffee.name} className="h-full w-full object-cover" />
+                ) : (
+                  <CoffeeIcon className="text-muted-foreground size-6" />
                 )}
               </div>
-              <p className="text-muted-foreground truncate text-sm">{coffee.description}</p>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-medium">{coffee.name}</p>
+                  {coffee.coffeeTypeName && (
+                    <Badge variant="outline" className="text-xs">
+                      {coffee.coffeeTypeName}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-muted-foreground truncate text-sm">{coffee.description}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={coffee.isAvailable} onCheckedChange={(checked) => handleToggle(coffee.id, checked)} />
-              <span className="text-muted-foreground w-16 text-xs">{coffee.isAvailable ? "Available" : "Hidden"}</span>
-            </div>
-            <Button variant="ghost" size="icon" asChild>
-              <Link to={`${basePath}/${coffee.id}/edit`}>
-                <Pencil className="size-4" />
-              </Link>
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Trash2 className="size-4" />
+
+            <div className="flex items-center justify-between gap-2 sm:justify-end sm:gap-4">
+              <div className="flex items-center gap-2">
+                <Switch checked={coffee.isAvailable} onCheckedChange={(checked) => handleToggle(coffee.id, checked)} />
+                <span className="text-muted-foreground w-16 text-xs">{coffee.isAvailable ? "Available" : "Hidden"}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to={`${basePath}/${coffee.id}/edit`}>
+                    <Pencil className="size-4" />
+                  </Link>
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete {coffee.name}?</AlertDialogTitle>
-                  <AlertDialogDescription>This can't be undone. Past orders will keep their own record of the name.</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleDelete(coffee.id)}>Delete</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete {coffee.name}?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This can't be undone. Past orders will keep their own record of the name.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(coffee.id)}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
           </CardContent>
         </Card>
       ))}
