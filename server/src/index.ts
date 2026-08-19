@@ -2,6 +2,8 @@ import path from "node:path";
 import fs from "node:fs";
 import express from "express";
 import session from "express-session";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
 import SqliteStoreFactory from "better-sqlite3-session-store";
 import Database from "better-sqlite3";
 import { env, cookieSecure } from "./env.js";
@@ -17,6 +19,16 @@ await seedMenuIfEmpty();
 
 const app = express();
 app.set("trust proxy", 1);
+
+// CSP is left off: this is a same-origin SPA with no third-party scripts, and
+// a strict default CSP tends to break Vite-built asset loading without
+// deliberate per-asset tuning. The rest of helmet's defaults (X-Content-Type-Options,
+// X-Frame-Options, HSTS, disabling X-Powered-By, etc.) apply as-is.
+app.use(helmet({ contentSecurityPolicy: false }));
+
+// Generous general limit (defense against basic abuse), a much tighter one
+// on auth routes specifically guards against credential stuffing/brute force.
+app.use("/api", rateLimit({ windowMs: 60 * 1000, limit: 120, standardHeaders: true, legacyHeaders: false }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

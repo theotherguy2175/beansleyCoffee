@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
+import { rateLimit } from "express-rate-limit";
 import { db } from "../db/client.js";
 import { users } from "../db/schema.js";
 import { findUserByEmail, findUserById, hashPassword, toPublicUser, verifyPassword } from "../services/auth.service.js";
@@ -7,6 +8,16 @@ import { asyncHandler } from "../lib/asyncHandler.js";
 import { HttpError } from "../middleware/errorHandler.js";
 
 export const authRouter = Router();
+
+// Credential-stuffing / brute-force guard — much tighter than the general API
+// limit, and scoped to just the two endpoints that actually check a password.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts — try again later." },
+});
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -16,6 +27,7 @@ const registerSchema = z.object({
 
 authRouter.post(
   "/register",
+  authLimiter,
   asyncHandler(async (req, res) => {
     const input = registerSchema.parse(req.body);
     const email = input.email.toLowerCase();
@@ -44,6 +56,7 @@ const loginSchema = z.object({
 
 authRouter.post(
   "/login",
+  authLimiter,
   asyncHandler(async (req, res) => {
     const input = loginSchema.parse(req.body);
     const user = findUserByEmail(input.email);
