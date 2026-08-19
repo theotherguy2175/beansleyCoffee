@@ -32,5 +32,12 @@ COPY --from=server-build /app/server/src/db/migrations ./dist/db/migrations
 COPY --from=server-build /app/server/seed ./seed
 COPY --from=client-build /app/client/dist ./public
 
+# node:22-bookworm-slim ships a pre-created non-root "node" user (uid/gid 1000)
+# — run as that instead of root. /data is a mounted volume (bind mount or
+# PVC), not baked into the image, so its permissions are handled separately:
+# see docker-compose.yml's user override and k8s/deployment.yaml's fsGroup.
+RUN chown -R node:node /app
+USER node
+
 EXPOSE 3000
 CMD ["node", "dist/index.js"]

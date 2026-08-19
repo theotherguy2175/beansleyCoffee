@@ -17,9 +17,18 @@ spec:
       labels:
         app: beansleycoffee
     spec:
+      # The image runs as the non-root "node" user (uid/gid 1000). fsGroup
+      # makes the kubelet chown the PVC to that group on mount so the
+      # container can actually write to /data.
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: beansleycoffee
           image: beansleycoffee:latest # replace with your registry image
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 3000
           envFrom:
