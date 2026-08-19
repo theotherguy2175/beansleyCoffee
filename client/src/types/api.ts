@@ -60,6 +60,9 @@ export interface Order {
   status: OrderStatus;
   notificationSent: boolean;
   createdAt: string;
+  // Only present on the staff/admin "all orders" endpoint.
+  customerName?: string;
+  customerEmail?: string;
 }
 
 export interface SystemSettings {

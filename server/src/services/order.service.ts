@@ -1,6 +1,6 @@
 import { eq, desc, and } from "drizzle-orm";
 import { db } from "../db/client.js";
-import { orders, type Order } from "../db/schema.js";
+import { orders, users, type Order } from "../db/schema.js";
 import { getCoffeeById } from "./coffee.service.js";
 import { findUserById } from "./auth.service.js";
 import { listSizes, listSyrups } from "./options.service.js";
@@ -78,8 +78,35 @@ export function listOrdersForUser(userId: number): OrderWithSyrups[] {
   return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt)).all().map(withParsedSyrups);
 }
 
-export function listAllOrders(): OrderWithSyrups[] {
-  return db.select().from(orders).orderBy(desc(orders.createdAt)).all().map(withParsedSyrups);
+export type OrderWithCustomer = OrderWithSyrups & { customerName: string; customerEmail: string };
+
+const orderColumns = {
+  id: orders.id,
+  userId: orders.userId,
+  coffeeId: orders.coffeeId,
+  coffeeNameSnapshot: orders.coffeeNameSnapshot,
+  syrupNames: orders.syrupNames,
+  sizeOz: orders.sizeOz,
+  strengthLabel: orders.strengthLabel,
+  notes: orders.notes,
+  pickupTime: orders.pickupTime,
+  status: orders.status,
+  notificationSent: orders.notificationSent,
+  createdAt: orders.createdAt,
+};
+
+export function listAllOrders(): OrderWithCustomer[] {
+  return db
+    .select({ ...orderColumns, customerName: users.name, customerEmail: users.email })
+    .from(orders)
+    .innerJoin(users, eq(orders.userId, users.id))
+    .orderBy(desc(orders.createdAt))
+    .all()
+    .map(({ customerName, customerEmail, ...order }) => ({
+      ...withParsedSyrups(order),
+      customerName,
+      customerEmail,
+    }));
 }
 
 export function getOrderById(id: number): OrderWithSyrups | undefined {

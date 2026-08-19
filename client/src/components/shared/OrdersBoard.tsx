@@ -85,6 +85,12 @@ export function OrdersBoard() {
           <CardContent className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="font-medium">{order.coffeeNameSnapshot}</p>
+              {order.customerName && (
+                <p className="text-muted-foreground text-sm">
+                  {order.customerName}
+                  {order.customerEmail && ` · ${order.customerEmail}`}
+                </p>
+              )}
               {formatOrderDetails(order) && (
                 <p className="text-muted-foreground text-sm">{formatOrderDetails(order)}</p>
               )}
