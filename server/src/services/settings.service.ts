@@ -6,7 +6,24 @@ export const SETTINGS_KEYS = {
   MAKER_NOTIFICATION_EMAIL: "maker_notification_email",
   SMTP_USER: "smtp_user",
   SMTP_PASS: "smtp_pass",
+  THEME_BACKGROUND: "theme_background",
+  THEME_FOREGROUND: "theme_foreground",
+  THEME_PRIMARY: "theme_primary",
+  THEME_SECONDARY: "theme_secondary",
+  THEME_ACCENT: "theme_accent",
+  THEME_CARD: "theme_card",
+  THEME_BORDER: "theme_border",
 } as const;
+
+export const THEME_SETTING_KEYS: string[] = [
+  SETTINGS_KEYS.THEME_BACKGROUND,
+  SETTINGS_KEYS.THEME_FOREGROUND,
+  SETTINGS_KEYS.THEME_PRIMARY,
+  SETTINGS_KEYS.THEME_SECONDARY,
+  SETTINGS_KEYS.THEME_ACCENT,
+  SETTINGS_KEYS.THEME_CARD,
+  SETTINGS_KEYS.THEME_BORDER,
+];
 
 export function getSetting(key: string): string | undefined {
   const row = db.select().from(systemSettings).where(eq(systemSettings.key, key)).get();
@@ -26,4 +43,8 @@ export function setSetting(key: string, value: string) {
       set: { value, updatedAt: new Date().toISOString() },
     })
     .run();
+}
+
+export function deleteSetting(key: string) {
+  db.delete(systemSettings).where(eq(systemSettings.key, key)).run();
 }

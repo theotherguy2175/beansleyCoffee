@@ -1,4 +1,4 @@
-IMAGE := git.casteel.pw/beansleycoffee:latest
+IMAGE := git.casteel.pw/ccasteel/beansleycoffee:latest
 PLATFORM := linux/amd64
 
 .PHONY: build push
