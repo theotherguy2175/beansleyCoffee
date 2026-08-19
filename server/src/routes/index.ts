@@ -5,6 +5,7 @@ import { ordersRouter } from "./orders.routes.js";
 import { usersRouter } from "./users.routes.js";
 import { settingsRouter } from "./settings.routes.js";
 import { coffeeTypesRouter, sizesRouter, syrupsRouter } from "./options.routes.js";
+import { themeRouter } from "./theme.routes.js";
 
 export const apiRouter = Router();
 
@@ -16,5 +17,6 @@ apiRouter.use("/orders", ordersRouter);
 apiRouter.use("/coffee-types", coffeeTypesRouter);
 apiRouter.use("/syrups", syrupsRouter);
 apiRouter.use("/sizes", sizesRouter);
+apiRouter.use("/theme", themeRouter);
 apiRouter.use("/admin/users", usersRouter);
 apiRouter.use("/admin/settings", settingsRouter);

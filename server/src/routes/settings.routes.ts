@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { requireRole } from "../middleware/auth.js";
-import { getAllSettings, setSetting, SETTINGS_KEYS } from "../services/settings.service.js";
+import { deleteSetting, getAllSettings, setSetting, SETTINGS_KEYS, THEME_SETTING_KEYS } from "../services/settings.service.js";
 import { getMakerNotificationEmail, sendTestEmail } from "../services/email.service.js";
 import { env } from "../env.js";
 import { asyncHandler } from "../lib/asyncHandler.js";
@@ -39,6 +39,11 @@ settingsRouter.put(
     res.json(buildSettingsResponse());
   })
 );
+
+settingsRouter.delete("/theme", (_req, res) => {
+  for (const key of THEME_SETTING_KEYS) deleteSetting(key);
+  res.json(buildSettingsResponse());
+});
 
 settingsRouter.post(
   "/test-email",

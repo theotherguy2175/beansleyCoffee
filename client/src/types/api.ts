@@ -71,3 +71,13 @@ export interface SystemSettings {
   smtpPassSet: boolean;
   [key: string]: string | boolean | undefined;
 }
+
+export interface ThemeColors {
+  theme_background?: string;
+  theme_foreground?: string;
+  theme_primary?: string;
+  theme_secondary?: string;
+  theme_accent?: string;
+  theme_card?: string;
+  theme_border?: string;
+}

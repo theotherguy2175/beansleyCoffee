@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/context/AuthContext";
 import { Navbar } from "@/components/shared/Navbar";
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
+import { ThemeApplier } from "@/components/shared/ThemeApplier";
 
 import { LoginPage } from "@/routes/public/LoginPage";
 import { RegisterPage } from "@/routes/public/RegisterPage";
@@ -124,6 +125,7 @@ function AppLayout() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeApplier />
       <AuthProvider>
         <BrowserRouter>
           <AppLayout />
