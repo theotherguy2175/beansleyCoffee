@@ -68,7 +68,7 @@ function OptionSection({
       <CardContent className="flex flex-col gap-4">
         <form onSubmit={handleAdd} className="flex gap-2">
           <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder={placeholder} />
-          <Button type="submit" disabled={isAdding} className="shrink-0">
+          <Button type="submit" loading={isAdding} className="shrink-0">
             Add
           </Button>
         </form>

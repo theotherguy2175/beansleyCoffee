@@ -65,7 +65,7 @@ export function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={form.formState.isSubmitting} className="mt-2">
+              <Button type="submit" loading={form.formState.isSubmitting} className="mt-2">
                 Log in
               </Button>
             </form>

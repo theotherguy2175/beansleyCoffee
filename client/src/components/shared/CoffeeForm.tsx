@@ -188,7 +188,7 @@ export function CoffeeForm({ basePath, coffee }: { basePath: string; coffee?: Co
                 onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
               />
             </div>
-            <Button type="submit" disabled={form.formState.isSubmitting} className="mt-2">
+            <Button type="submit" loading={form.formState.isSubmitting} className="mt-2">
               {coffee ? "Save changes" : "Add coffee"}
             </Button>
           </form>

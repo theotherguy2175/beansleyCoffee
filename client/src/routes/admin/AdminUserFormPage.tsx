@@ -134,7 +134,7 @@ export function AdminUserFormPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={form.formState.isSubmitting} className="mt-2">
+              <Button type="submit" loading={form.formState.isSubmitting} className="mt-2">
                 {isEditing ? "Save changes" : "Add user"}
               </Button>
             </form>

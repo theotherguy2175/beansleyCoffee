@@ -79,7 +79,7 @@ export function RegisterPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={form.formState.isSubmitting} className="mt-2">
+              <Button type="submit" loading={form.formState.isSubmitting} className="mt-2">
                 Sign up
               </Button>
             </form>

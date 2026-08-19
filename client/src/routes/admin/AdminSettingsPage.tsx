@@ -80,7 +80,7 @@ export function AdminSettingsPage() {
               />
             </div>
           )}
-          <Button onClick={handleSaveNotifications} disabled={updateSettings.isPending} className="w-fit">
+          <Button onClick={handleSaveNotifications} loading={updateSettings.isPending} className="w-fit">
             Save
           </Button>
         </CardContent>
@@ -131,16 +131,11 @@ export function AdminSettingsPage() {
             </>
           )}
           <div className="flex flex-wrap gap-2">
-            <Button onClick={handleSaveSmtp} disabled={updateSettings.isPending} className="w-fit">
+            <Button onClick={handleSaveSmtp} loading={updateSettings.isPending} className="w-fit">
               Save
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleTestEmail}
-              disabled={sendTestEmail.isPending}
-              className="w-fit"
-            >
-              {sendTestEmail.isPending ? "Sending…" : "Send test email"}
+            <Button variant="outline" onClick={handleTestEmail} loading={sendTestEmail.isPending} className="w-fit">
+              Send test email
             </Button>
           </div>
         </CardContent>
