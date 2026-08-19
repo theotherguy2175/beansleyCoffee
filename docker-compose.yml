@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./.docker-data:/data
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DB_PATH: /data/db.sqlite
+      SESSIONS_DB_PATH: /data/sessions.db
+      UPLOADS_DIR: /data/uploads
+      SESSION_SECRET: dev-secret-change-me
+      # No TLS-terminating proxy in front of this local compose stack, so the
+      # session cookie can't be marked Secure or the browser will never send
+      # it back — that's what causes "logged in" UI state but 401s on every
+      # follow-up request. Production (behind ingress) should leave this true.
+      COOKIE_SECURE: "false"
+      # These three can also be left unset and configured later from the admin
+      # Settings page (stored in the DB, takes precedence over these).
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAKER_NOTIFICATION_EMAIL: ${MAKER_NOTIFICATION_EMAIL:-}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?BOOTSTRAP_ADMIN_PASSWORD is required}
+      BOOTSTRAP_ADMIN_NAME: Admin

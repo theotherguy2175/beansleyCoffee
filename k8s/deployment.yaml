@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beansleycoffee
+spec:
+  replicas: 1
+  # SQLite is single-writer, and the PVC is ReadWriteOnce — Recreate avoids the
+  # rollout scheduling a second pod before the first one (and its volume mount)
+  # is torn down.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: beansleycoffee
+  template:
+    metadata:
+      labels:
+        app: beansleycoffee
+    spec:
+      containers:
+        - name: beansleycoffee
+          image: beansleycoffee:latest # replace with your registry image
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: beansleycoffee-config
+            - secretRef:
+                name: beansleycoffee-secrets
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: beansleycoffee-data

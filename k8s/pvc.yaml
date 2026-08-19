@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: beansleycoffee-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      # SQLite DB + sessions + uploaded coffee images. Resize later if needed.
+      storage: 2Gi

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: beansleycoffee-config
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  DB_PATH: "/data/db.sqlite"
+  SESSIONS_DB_PATH: "/data/sessions.db"
+  UPLOADS_DIR: "/data/uploads"
+  BOOTSTRAP_ADMIN_NAME: "Admin"
+  # Optional — where order-notification emails go. Can also be set later from
+  # the admin Settings page (stored in the DB, takes precedence over this).
+  MAKER_NOTIFICATION_EMAIL: "maker@example.com"
+  # Requires TLS terminating at the ingress with X-Forwarded-Proto forwarded
+  # (ingress-nginx does this by default) — otherwise session cookies never
+  # get sent back by the browser. See docker-compose.yml for the local,
+  # non-TLS equivalent (COOKIE_SECURE: "false").
+  COOKIE_SECURE: "true"

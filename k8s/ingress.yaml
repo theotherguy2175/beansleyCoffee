@@ -1,0 +1,25 @@
+# Adjust ingressClassName / annotations (e.g. cert-manager cluster-issuer) to
+# match your cluster's existing ingress-nginx + cert-manager setup.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: beansleycoffee
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - coffee.example.com # replace with your domain
+      secretName: beansleycoffee-tls
+  rules:
+    - host: coffee.example.com # replace with your domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: beansleycoffee
+                port:
+                  number: 80

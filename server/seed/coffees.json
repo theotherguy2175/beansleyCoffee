@@ -1,0 +1,84 @@
+{
+  "coffeeTypes": ["Espresso-Based", "Drip Coffee", "Cold Brew", "Specialty"],
+  "syrups": ["Vanilla", "Caramel", "Hazelnut", "Chocolate"],
+  "sizes": [8, 12, 16],
+  "coffees": [
+    {
+      "name": "Latte",
+      "description": "Espresso topped with a generous pour of steamed milk and a light layer of foam — smooth, mellow, and milk-forward.",
+      "image": "latte.jpg",
+      "type": "Espresso-Based",
+      "strengthOptions": ["Single shot", "Double shot"]
+    },
+    {
+      "name": "Flat White",
+      "description": "A flat white is an espresso-based coffee drink made with two shots of espresso (or ristretto) and steamed milk topped with a thin layer of velvety microfoam. Originating in Australia or New Zealand, it is served in a small cup (typically 5–6 ounces) and is characterized by a higher coffee-to-milk ratio than a latte, resulting in a stronger, more intense coffee flavor with a smooth, creamy texture",
+      "image": "flat-white.webp",
+      "type": "Espresso-Based",
+      "strengthOptions": ["Single shot", "Double shot"]
+    },
+    {
+      "name": "Cappuccino",
+      "description": "Equal parts espresso, steamed milk, and airy microfoam — bold, frothy, and a classic.",
+      "image": "cappuccino.jpg",
+      "type": "Espresso-Based",
+      "strengthOptions": ["Single shot", "Double shot"]
+    },
+    {
+      "name": "Americano",
+      "description": "Espresso diluted with hot water for a lighter body, with the same rich flavor as drip coffee.",
+      "image": "americano.jpg",
+      "type": "Espresso-Based",
+      "strengthOptions": ["Single shot", "Double shot"]
+    },
+    {
+      "name": "Espresso",
+      "description": "A concentrated shot of coffee brewed by forcing hot water through finely-ground beans — bold and intense.",
+      "image": "espresso.jpg",
+      "type": "Espresso-Based",
+      "strengthOptions": ["Single shot", "Double shot"]
+    },
+    {
+      "name": "Mocha",
+      "description": "Espresso with steamed milk and chocolate syrup, topped with whipped cream — a sweet cross between a latte and hot cocoa.",
+      "image": "mocha.jpg",
+      "type": "Espresso-Based",
+      "strengthOptions": ["Single shot", "Double shot"]
+    },
+    {
+      "name": "Macchiato",
+      "description": "Espresso 'stained' with just a dollop of foamed milk — strong coffee flavor with a touch of creaminess.",
+      "image": "macchiato.jpg",
+      "type": "Espresso-Based",
+      "strengthOptions": ["Single shot", "Double shot"]
+    },
+    {
+      "name": "Cold Brew",
+      "description": "Coffee steeped in cold water for 12+ hours, producing a smooth, low-acid, naturally sweet concentrate served over ice.",
+      "image": "cold-brew.jpg",
+      "type": "Cold Brew",
+      "strengthOptions": ["Regular", "Decaf"]
+    },
+    {
+      "name": "Affogato",
+      "description": "A scoop of vanilla ice cream drowned in a shot of hot espresso — part dessert, part coffee.",
+      "image": "affogato.jpg",
+      "type": "Specialty",
+      "strengthOptions": []
+    },
+    {
+      "name": "Cortado",
+      "description": "Espresso cut with a small amount of warm milk to reduce acidity while keeping a strong coffee flavor.",
+      "image": "cortado.jpg",
+      "type": "Espresso-Based",
+      "strengthOptions": ["Single shot", "Double shot"]
+    },
+    {
+      "name": "Black Coffee",
+      "description": "Simple drip coffee, brewed hot and served plain — no milk, no sugar, just coffee.",
+      "image": "black-coffee.jpg",
+      "type": "Drip Coffee",
+      "strengthOptions": ["Regular", "Decaf"]
+    }
+  ]
+}

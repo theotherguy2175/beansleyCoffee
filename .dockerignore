@@ -1,0 +1,11 @@
+node_modules
+**/node_modules
+**/dist
+client/dist
+server/uploads
+*.sqlite
+*.sqlite-*
+.env
+.env.local
+.git
+.docker-data
