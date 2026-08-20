@@ -4,6 +4,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      // Applied before first paint (and kept live) so the browser's own
+      // dark-mode detection — and extensions like Dark Reader that look for
+      // it — see this site as already handling dark mode natively, instead
+      // of falling back to their own color-inversion heuristics on top of
+      // the (warm/orange-leaning) light palette.
+      (function () {
+        var mql = window.matchMedia("(prefers-color-scheme: dark)");
+        var apply = function (matches) {
+          document.documentElement.classList.toggle("dark", matches);
+        };
+        apply(mql.matches);
+        mql.addEventListener("change", function (e) {
+          apply(e.matches);
+        });
+      })();
+    </script>
     <title>BeansleyCoffee</title>
   </head>
   <body>

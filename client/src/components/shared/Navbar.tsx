@@ -57,7 +57,7 @@ export function Navbar() {
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3">
         <Link to="/menu" className="flex shrink-0 items-center gap-2 font-semibold">
           <Coffee className="size-5" />
-          <span className="hidden sm:inline">BeansleyCoffee</span>
+          <span className="truncate">BeansleyCoffee</span>
         </Link>
 
         {/* Desktop nav */}
