@@ -33,6 +33,11 @@ COPY --from=server-build /app/server/src/db/migrations ./dist/db/migrations
 COPY --from=server-build /app/server/seed ./seed
 COPY --from=client-build /app/client/dist ./public
 
+# Declared this late so bumping it (every build, since it's a timestamp)
+# doesn't invalidate the npm install/COPY layers above.
+ARG VERSION=dev
+ENV APP_VERSION=$VERSION
+
 # node:22-bookworm-slim ships a pre-created non-root "node" user (uid/gid 1000)
 # — run as that instead of root. /data is a mounted volume (bind mount or
 # PVC), not baked into the image, so its permissions are handled separately:

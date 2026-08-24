@@ -15,3 +15,8 @@ jobs:
 
       - name: Build and push
         run: make push
+
+      - name: Clean up old image tags
+        env:
+          GITEA_REGISTRY_TOKEN: ${{ secrets.GITEA_REGISTRY_TOKEN }}
+        run: bash .github/scripts/cleanup-tags.sh

@@ -25,6 +25,9 @@ const envSchema = z.object({
   BOOTSTRAP_ADMIN_EMAIL: z.string().email(),
   BOOTSTRAP_ADMIN_PASSWORD: z.string().min(8),
   BOOTSTRAP_ADMIN_NAME: z.string().default("Admin"),
+  // Baked in at image build time (see Makefile); "dev" for local runs where
+  // no image build happened.
+  APP_VERSION: z.string().default("dev"),
 });
 
 const parsed = envSchema.safeParse(process.env);

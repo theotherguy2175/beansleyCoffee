@@ -6,6 +6,8 @@ import { usersRouter } from "./users.routes.js";
 import { settingsRouter } from "./settings.routes.js";
 import { coffeeTypesRouter, sizesRouter, syrupsRouter } from "./options.routes.js";
 import { themeRouter } from "./theme.routes.js";
+import { requireRole } from "../middleware/auth.js";
+import { env } from "../env.js";
 
 export const apiRouter = Router();
 
@@ -20,3 +22,4 @@ apiRouter.use("/sizes", sizesRouter);
 apiRouter.use("/theme", themeRouter);
 apiRouter.use("/admin/users", usersRouter);
 apiRouter.use("/admin/settings", settingsRouter);
+apiRouter.get("/admin/version", requireRole("admin"), (_req, res) => res.json({ version: env.APP_VERSION }));
