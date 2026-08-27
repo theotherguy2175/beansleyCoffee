@@ -53,11 +53,20 @@ rm -f "$pages_file"
 
 echo "Found $(jq length <<<"$dated") dated tag(s) for ${PACKAGE}."
 
+# jq's fromdateiso8601 only accepts a literal "Z" suffix, but Gitea's
+# created_at comes back with a numeric offset (e.g. "-04:00"), so ages are
+# computed here with GNU `date -d`, which handles both.
+with_age="[]"
+while IFS=$'\t' read -r version created_at; do
+  [ -z "$version" ] && continue
+  epoch=$(date -u -d "$created_at" +%s)
+  age=$((NOW_EPOCH - epoch))
+  with_age=$(jq -c --arg v "$version" --argjson age "$age" '. + [{version: $v, age: $age}]' <<<"$with_age")
+done < <(jq -r '.[] | [.version, .created_at] | @tsv' <<<"$dated")
+
 # Ascending by age, so index [0] of any age-filtered subset is the newest
 # member of that subset (closest to the threshold from above).
-sorted=$(jq --argjson now "$NOW_EPOCH" '
-  map(. + {age: ($now - (.created_at | fromdateiso8601))}) | sort_by(.age)
-' <<<"$dated")
+sorted=$(jq 'sort_by(.age)' <<<"$with_age")
 
 rolling=$(jq -c --argjson seven "$SEVEN_DAYS" '[.[] | select(.age < $seven) | .version]' <<<"$sorted")
 weekly=$(jq -r --argjson seven "$SEVEN_DAYS" '[.[] | select(.age >= $seven)] | .[0].version // empty' <<<"$sorted")
