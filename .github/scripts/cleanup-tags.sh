@@ -19,11 +19,27 @@ NOW_EPOCH=$(date -u +%s)
 
 auth=(-H "Authorization: token ${GITEA_REGISTRY_TOKEN}")
 
+# GET wrapper that prints the HTTP status and response body (never the
+# token) on anything but 200, so a failure here shows up in the CI log
+# instead of just aborting silently.
+get() {
+  local url="$1" resp code
+  resp=$(mktemp)
+  code=$(curl -s -o "$resp" -w "%{http_code}" "${auth[@]}" "$url")
+  if [ "$code" != "200" ]; then
+    echo "ERROR: GET $url failed (HTTP $code): $(cat "$resp")" >&2
+    rm -f "$resp"
+    return 1
+  fi
+  cat "$resp"
+  rm -f "$resp"
+}
+
 pages_file=$(mktemp)
 echo "[]" >"$pages_file"
 page=1
 while true; do
-  chunk=$(curl -sf "${auth[@]}" "${BASE_URL}/api/v1/packages/${OWNER}?type=container&q=${PACKAGE}&page=${page}&limit=50")
+  chunk=$(get "${BASE_URL}/api/v1/packages/${OWNER}?type=container&q=${PACKAGE}&page=${page}&limit=50")
   count=$(jq 'length' <<<"$chunk")
   jq -s '.[0] + .[1]' "$pages_file" <(echo "$chunk") >"${pages_file}.tmp" && mv "${pages_file}.tmp" "$pages_file"
   [ "$count" -lt 50 ] && break
@@ -58,10 +74,13 @@ jq -r '.[].version' <<<"$sorted" | while read -r v; do
     echo "keep   $v"
   else
     echo "delete $v"
-    if curl -sf -X DELETE "${auth[@]}" "${BASE_URL}/api/v1/packages/${OWNER}/container/${PACKAGE}/${v}"; then
+    resp=$(mktemp)
+    code=$(curl -s -o "$resp" -w "%{http_code}" -X DELETE "${auth[@]}" "${BASE_URL}/api/v1/packages/${OWNER}/container/${PACKAGE}/${v}")
+    if [ "$code" = "204" ] || [ "$code" = "200" ]; then
       echo "  deleted $v"
     else
-      echo "  WARNING: failed to delete $v (continuing)"
+      echo "  WARNING: failed to delete $v (HTTP $code): $(cat "$resp") (continuing)"
     fi
+    rm -f "$resp"
   fi
 done
