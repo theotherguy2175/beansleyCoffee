@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCoffee } from "@/hooks/useCoffees";
 import { useCreateOrder } from "@/hooks/useOrders";
 import { useSizes, useSyrups } from "@/hooks/useMenuOptions";
+import { useBaristas } from "@/hooks/useUsers";
 import { ApiError } from "@/lib/api";
 
 const NONE = "none";
@@ -30,6 +31,7 @@ const schema = z.object({
   syrupNames: z.array(z.string()),
   sizeOz: z.string(),
   strengthLabel: z.string(),
+  baristaId: z.string().min(1, "Choose a barista"),
 });
 
 function toDateTimeLocal(date: Date) {
@@ -59,6 +61,7 @@ export function OrderPage() {
   const { data: coffee, isLoading } = useCoffee(id);
   const { data: syrups } = useSyrups();
   const { data: sizes } = useSizes();
+  const { data: baristas, isLoading: baristasLoading } = useBaristas();
   const createOrder = useCreateOrder();
 
   const form = useForm({
@@ -66,12 +69,14 @@ export function OrderPage() {
     defaultValues: {
       // Reordering reuses the previous coffee's customization, but the pickup
       // time always resets to "30 minutes from now" — the old order's pickup
-      // time is stale by definition.
+      // time is stale by definition. Barista isn't carried over either — who's
+      // available now may not be who made it last time.
       notes: reorder?.notes ?? "",
       pickupTime: defaultPickupTime(),
       syrupNames: reorder?.syrupNames ?? [],
       sizeOz: reorder?.sizeOz ? String(reorder.sizeOz) : NONE,
       strengthLabel: reorder?.strengthLabel ?? NONE,
+      baristaId: "",
     },
   });
 
@@ -79,6 +84,7 @@ export function OrderPage() {
     try {
       const order = await createOrder.mutateAsync({
         coffeeId: id,
+        baristaId: Number(values.baristaId),
         notes: values.notes,
         pickupTime: new Date(values.pickupTime).toISOString(),
         syrupNames: values.syrupNames.length > 0 ? values.syrupNames : undefined,
@@ -90,6 +96,8 @@ export function OrderPage() {
       toast.error(err instanceof ApiError ? err.message : "Couldn't place your order");
     }
   }
+
+  const noBaristasAvailable = !baristasLoading && (baristas?.length ?? 0) === 0;
 
   if (isLoading) {
     return (
@@ -115,6 +123,36 @@ export function OrderPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+              <FormField
+                control={form.control}
+                name="baristaId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Choose your barista</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange} disabled={noBaristasAvailable}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder={noBaristasAvailable ? "No baristas available" : "Pick a barista"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {baristas?.map((barista) => (
+                          <SelectItem key={barista.id} value={String(barista.id)}>
+                            {barista.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {noBaristasAvailable && (
+                      <p className="text-muted-foreground text-sm">
+                        No baristas are available right now — check back soon.
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="pickupTime"
@@ -233,7 +271,7 @@ export function OrderPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" loading={form.formState.isSubmitting} className="mt-2">
+              <Button type="submit" loading={form.formState.isSubmitting} disabled={noBaristasAvailable} className="mt-2">
                 Place order
               </Button>
             </form>

@@ -10,7 +10,7 @@ export async function bootstrapAdmin() {
 
   const existingByEmail = db.select().from(users).where(eq(users.email, env.BOOTSTRAP_ADMIN_EMAIL.toLowerCase())).get();
   if (existingByEmail) {
-    db.update(users).set({ role: "admin" }).where(eq(users.id, existingByEmail.id)).run();
+    db.update(users).set({ role: "admin", isBarista: true }).where(eq(users.id, existingByEmail.id)).run();
     console.log(`Promoted existing user ${existingByEmail.email} to admin`);
     return;
   }
@@ -23,6 +23,7 @@ export async function bootstrapAdmin() {
       passwordHash,
       name: env.BOOTSTRAP_ADMIN_NAME,
       role: "admin",
+      isBarista: true,
       createdAt: now,
       updatedAt: now,
     })

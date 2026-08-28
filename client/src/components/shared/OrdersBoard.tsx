@@ -91,6 +91,7 @@ export function OrdersBoard() {
                   {order.customerEmail && ` · ${order.customerEmail}`}
                 </p>
               )}
+              {order.baristaName && <p className="text-muted-foreground text-sm">Barista: {order.baristaName}</p>}
               {formatOrderDetails(order) && (
                 <p className="text-muted-foreground text-sm">{formatOrderDetails(order)}</p>
               )}

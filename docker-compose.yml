@@ -22,7 +22,6 @@ services:
       # Settings page (stored in the DB, takes precedence over these).
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
-      MAKER_NOTIFICATION_EMAIL: ${MAKER_NOTIFICATION_EMAIL:-}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?BOOTSTRAP_ADMIN_PASSWORD is required}
       BOOTSTRAP_ADMIN_NAME: Admin

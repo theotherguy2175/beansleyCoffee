@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { eq } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { users, type User } from "../db/schema.js";
 
@@ -27,6 +27,15 @@ export function toPublicUser(user: User) {
     email: user.email,
     name: user.name,
     role: user.role,
+    isBarista: user.isBarista,
     createdAt: user.createdAt,
   };
+}
+
+export function listActiveBaristas(): Array<{ id: number; name: string }> {
+  return db
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(and(inArray(users.role, ["admin", "staff"]), eq(users.isBarista, true)))
+    .all();
 }

@@ -27,6 +27,7 @@ export function useOrder(id: number | undefined) {
 
 export interface CreateOrderInput {
   coffeeId: number;
+  baristaId: number;
   notes?: string;
   pickupTime: string;
   syrupNames?: string[];

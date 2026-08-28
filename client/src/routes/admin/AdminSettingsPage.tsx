@@ -62,13 +62,12 @@ export function AdminSettingsPage() {
   const updateTheme = useUpdateTheme();
   const resetTheme = useResetTheme();
 
-  const [makerEmail, setMakerEmail] = useState("");
   const [smtpUser, setSmtpUser] = useState("");
   const [smtpPass, setSmtpPass] = useState("");
+  const [testEmailTo, setTestEmailTo] = useState("");
   const [theme, setTheme] = useState<Record<keyof ThemeColors, string>>(DEFAULT_THEME);
 
   useEffect(() => {
-    if (settings?.maker_notification_email) setMakerEmail(settings.maker_notification_email);
     if (typeof settings?.smtp_user === "string") setSmtpUser(settings.smtp_user);
     if (settings) {
       const next = { ...DEFAULT_THEME };
@@ -85,15 +84,6 @@ export function AdminSettingsPage() {
     if (isValidHex(value)) applyTheme({ [key]: value });
   }
 
-  async function handleSaveNotifications() {
-    try {
-      await updateSettings.mutateAsync({ maker_notification_email: makerEmail });
-      toast.success("Settings saved");
-    } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : "Couldn't save settings");
-    }
-  }
-
   async function handleSaveSmtp() {
     try {
       const payload: Record<string, string> = { smtp_user: smtpUser };
@@ -108,7 +98,7 @@ export function AdminSettingsPage() {
 
   async function handleTestEmail() {
     try {
-      const result = await sendTestEmail.mutateAsync(undefined);
+      const result = await sendTestEmail.mutateAsync(testEmailTo);
       if (result.success) {
         toast.success("Test email sent — check the inbox.");
       } else {
@@ -150,36 +140,11 @@ export function AdminSettingsPage() {
 
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Order notifications</CardTitle>
-          <CardDescription>Where order notification emails are sent when someone places an order.</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {isLoading ? (
-            <Skeleton className="h-9" />
-          ) : (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="maker-email">Maker notification email</Label>
-              <Input
-                id="maker-email"
-                type="email"
-                value={makerEmail}
-                onChange={(e) => setMakerEmail(e.target.value)}
-                placeholder="maker@example.com"
-              />
-            </div>
-          )}
-          <Button onClick={handleSaveNotifications} loading={updateSettings.isPending} className="w-fit">
-            Save
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card className="mt-6">
-        <CardHeader>
           <CardTitle>SMTP (Gmail)</CardTitle>
           <CardDescription>
-            The Gmail address and app password used to send order notification emails. Overrides the server's env vars once
-            set. Create an app password at{" "}
+            The Gmail address and app password used to send all order emails — new-order notifications go to whichever
+            barista the customer picked (see Users to toggle who's an active barista), receipts and ready-for-pickup emails
+            go to the customer. Overrides the server's env vars once set. Create an app password at{" "}
             <a
               href="https://myaccount.google.com/apppasswords"
               target="_blank"
@@ -218,11 +183,24 @@ export function AdminSettingsPage() {
               </div>
             </>
           )}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-end gap-2">
             <Button onClick={handleSaveSmtp} loading={updateSettings.isPending} className="w-fit">
               Save
             </Button>
-            <Button variant="outline" onClick={handleTestEmail} loading={sendTestEmail.isPending} className="w-fit">
+            <Input
+              type="email"
+              value={testEmailTo}
+              onChange={(e) => setTestEmailTo(e.target.value)}
+              placeholder="Send test to…"
+              className="w-56"
+            />
+            <Button
+              variant="outline"
+              onClick={handleTestEmail}
+              loading={sendTestEmail.isPending}
+              disabled={!testEmailTo}
+              className="w-fit"
+            >
               Send test email
             </Button>
           </div>

@@ -21,7 +21,6 @@ const envSchema = z.object({
   // Settings page, which is stored in the DB and takes precedence.
   SMTP_USER: z.string().optional().default(""),
   SMTP_PASS: z.string().optional().default(""),
-  MAKER_NOTIFICATION_EMAIL: z.string().email().optional(),
   BOOTSTRAP_ADMIN_EMAIL: z.string().email(),
   BOOTSTRAP_ADMIN_PASSWORD: z.string().min(8),
   BOOTSTRAP_ADMIN_NAME: z.string().default("Admin"),

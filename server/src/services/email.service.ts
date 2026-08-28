@@ -16,10 +16,6 @@ function getTransporter() {
   return nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
 }
 
-export function getMakerNotificationEmail() {
-  return getSetting(SETTINGS_KEYS.MAKER_NOTIFICATION_EMAIL) || env.MAKER_NOTIFICATION_EMAIL;
-}
-
 function formatPickupTime(iso: string) {
   return new Date(iso).toLocaleString("en-US", {
     dateStyle: "medium",
@@ -39,25 +35,21 @@ function orderDetailRows(order: OrderWithSyrups): EmailDetailRow[] {
   ];
 }
 
-export async function sendOrderNotification(order: OrderWithSyrups, customer: User): Promise<boolean> {
-  const recipient = getMakerNotificationEmail();
-  if (!recipient) {
-    console.warn("No maker notification email configured; skipping order notification email");
-    return false;
-  }
-
+export async function sendOrderNotification(order: OrderWithSyrups, customer: User, barista: User): Promise<boolean> {
   const rows = orderDetailRows(order);
   const heading = "New order";
-  const intro = `<strong>${customer.name}</strong> (${customer.email}) just placed an order.`;
-  const footerNote = "Sent automatically by BeansleyCoffee when an order is placed.";
+  const baristaFirstName = barista.name.split(" ")[0];
+  const introText = `Hey ${baristaFirstName} — ${customer.name} (${customer.email}) just ordered from you.`;
+  const intro = `Hey ${baristaFirstName} — <strong>${customer.name}</strong> (${customer.email}) just ordered from you.`;
+  const footerNote = "Sent automatically by BeansleyCoffee when an order is placed with you as the barista.";
 
   try {
     const { user } = getSmtpCredentials();
     await getTransporter().sendMail({
       from: `BeansleyCoffee <${user}>`,
-      to: recipient,
+      to: barista.email,
       subject: `New order: ${order.coffeeNameSnapshot} — pickup ${formatPickupTime(order.pickupTime)}`,
-      text: renderEmailShellText({ heading, intro: `${customer.name} (${customer.email}) just placed an order.`, rows, footerNote }),
+      text: renderEmailShellText({ heading, intro: introText, rows, footerNote }),
       html: renderEmailShell({ preheader: `New order from ${customer.name}`, heading, intro, rows, footerNote }),
     });
     return true;

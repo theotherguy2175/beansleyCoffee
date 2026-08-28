@@ -18,6 +18,7 @@ ordersRouter.use(requireAuth);
 
 const createOrderSchema = z.object({
   coffeeId: z.coerce.number(),
+  baristaId: z.coerce.number().int().positive(),
   notes: z.string().max(500).optional(),
   pickupTime: z.string().min(1),
   syrupNames: z.array(z.string().min(1)).optional(),

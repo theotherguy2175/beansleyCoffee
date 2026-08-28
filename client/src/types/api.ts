@@ -5,7 +5,13 @@ export interface PublicUser {
   email: string;
   name: string;
   role: Role;
+  isBarista: boolean;
   createdAt: string;
+}
+
+export interface Barista {
+  id: number;
+  name: string;
 }
 
 export interface CoffeeType {
@@ -51,6 +57,7 @@ export interface Order {
   id: number;
   userId: number;
   coffeeId: number;
+  baristaId: number | null;
   coffeeNameSnapshot: string;
   syrupNames: string[];
   sizeOz: number | null;
@@ -63,10 +70,10 @@ export interface Order {
   // Only present on the staff/admin "all orders" endpoint.
   customerName?: string;
   customerEmail?: string;
+  baristaName?: string | null;
 }
 
 export interface SystemSettings {
-  maker_notification_email?: string;
   smtp_user?: string;
   smtpPassSet: boolean;
   [key: string]: string | boolean | undefined;

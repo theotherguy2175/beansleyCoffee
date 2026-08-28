@@ -29,10 +29,31 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/context/AuthContext";
-import { useDeleteUser, useResetPassword, useUsers } from "@/hooks/useUsers";
+import { useDeleteUser, useResetPassword, useUpdateUser, useUsers } from "@/hooks/useUsers";
 import { ApiError } from "@/lib/api";
 import type { PublicUser } from "@/types/api";
+
+function BaristaToggle({ user }: { user: PublicUser }) {
+  const updateUser = useUpdateUser();
+
+  if (user.role === "customer") {
+    return <span className="text-muted-foreground text-sm">—</span>;
+  }
+
+  async function handleToggle(checked: boolean) {
+    try {
+      await updateUser.mutateAsync({ id: user.id, isBarista: checked });
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Couldn't update barista status");
+    }
+  }
+
+  return (
+    <Switch checked={user.isBarista} onCheckedChange={handleToggle} disabled={updateUser.isPending} aria-label="Active barista" />
+  );
+}
 
 function ResetPasswordDialog({ user }: { user: PublicUser }) {
   const [password, setPassword] = useState("");
@@ -159,7 +180,10 @@ export function AdminUsersPage() {
                     </div>
                     <p className="text-muted-foreground truncate text-sm">{user.email}</p>
                   </div>
-                  <UserActions user={user} currentUserId={currentUser?.id} />
+                  <div className="flex items-center gap-3">
+                    <BaristaToggle user={user} />
+                    <UserActions user={user} currentUserId={currentUser?.id} />
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -172,6 +196,7 @@ export function AdminUsersPage() {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Active barista</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -184,6 +209,9 @@ export function AdminUsersPage() {
                     <Badge variant="secondary" className="capitalize">
                       {user.role}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <BaristaToggle user={user} />
                   </TableCell>
                   <TableCell className="flex justify-end gap-1">
                     <UserActions user={user} currentUserId={currentUser?.id} />

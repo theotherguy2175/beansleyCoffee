@@ -3,7 +3,6 @@ import { db } from "../db/client.js";
 import { systemSettings } from "../db/schema.js";
 
 export const SETTINGS_KEYS = {
-  MAKER_NOTIFICATION_EMAIL: "maker_notification_email",
   SMTP_USER: "smtp_user",
   SMTP_PASS: "smtp_pass",
   THEME_BACKGROUND: "theme_background",

@@ -21,6 +21,9 @@ const createUserSchema = z.object({
   password: z.string().min(8),
   name: z.string().min(1),
   role: z.enum(["admin", "staff", "customer"]),
+  // Defaults to true for admin/staff (every admin/staff starts as an active
+  // barista) and is always forced false for customers, regardless of input.
+  isBarista: z.boolean().optional(),
 });
 
 usersRouter.post(
@@ -30,11 +33,12 @@ usersRouter.post(
     const email = input.email.toLowerCase();
     if (findUserByEmail(email)) throw new HttpError(409, "An account with that email already exists");
 
+    const isBarista = input.role === "customer" ? false : (input.isBarista ?? true);
     const passwordHash = await hashPassword(input.password);
     const now = new Date().toISOString();
     const user = db
       .insert(users)
-      .values({ email, passwordHash, name: input.name, role: input.role, createdAt: now, updatedAt: now })
+      .values({ email, passwordHash, name: input.name, role: input.role, isBarista, createdAt: now, updatedAt: now })
       .returning()
       .get();
     res.status(201).json(toPublicUser(user));
@@ -51,13 +55,15 @@ const updateUserSchema = z.object({
   email: z.string().email().optional(),
   name: z.string().min(1).optional(),
   role: z.enum(["admin", "staff", "customer"]).optional(),
+  isBarista: z.boolean().optional(),
 });
 
 usersRouter.put(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    if (!findUserById(id)) throw new HttpError(404, "User not found");
+    const existingUser = findUserById(id);
+    if (!existingUser) throw new HttpError(404, "User not found");
     const input = updateUserSchema.parse(req.body);
 
     if (input.email) {
@@ -65,9 +71,13 @@ usersRouter.put(
       if (existing && existing.id !== id) throw new HttpError(409, "An account with that email already exists");
     }
 
+    // Customers can never be baristas, regardless of what's sent.
+    const effectiveRole = input.role ?? existingUser.role;
+    const isBarista = effectiveRole === "customer" ? false : input.isBarista;
+
     const user = db
       .update(users)
-      .set({ ...input, email: input.email?.toLowerCase(), updatedAt: new Date().toISOString() })
+      .set({ ...input, isBarista, email: input.email?.toLowerCase(), updatedAt: new Date().toISOString() })
       .where(eq(users.id, id))
       .returning()
       .get();

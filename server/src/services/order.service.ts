@@ -1,4 +1,5 @@
 import { eq, desc, and } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import { db } from "../db/client.js";
 import { orders, users, type Order } from "../db/schema.js";
 import { getCoffeeById } from "./coffee.service.js";
@@ -9,6 +10,7 @@ import { HttpError } from "../middleware/errorHandler.js";
 
 export interface CreateOrderInput {
   coffeeId: number;
+  baristaId: number;
   notes?: string;
   pickupTime: string;
   syrupNames?: string[];
@@ -33,6 +35,11 @@ export async function createOrder(userId: number, input: CreateOrderInput) {
     throw new HttpError(401, "Unauthorized");
   }
 
+  const barista = findUserById(input.baristaId);
+  if (!barista || barista.role === "customer" || !barista.isBarista) {
+    throw new HttpError(400, "Selected barista is not available");
+  }
+
   const syrupNames = input.syrupNames?.filter(Boolean) ?? [];
   const availableSyrups = new Set(listSyrups().map((s) => s.name));
   if (syrupNames.some((name) => !availableSyrups.has(name))) {
@@ -50,6 +57,7 @@ export async function createOrder(userId: number, input: CreateOrderInput) {
     .values({
       userId,
       coffeeId: coffee.id,
+      baristaId: barista.id,
       coffeeNameSnapshot: coffee.name,
       syrupNames: syrupNames.length > 0 ? JSON.stringify(syrupNames) : null,
       sizeOz: input.sizeOz,
@@ -64,7 +72,7 @@ export async function createOrder(userId: number, input: CreateOrderInput) {
     .get();
 
   const parsedOrder = withParsedSyrups(order);
-  const sent = await sendOrderNotification(parsedOrder, customer);
+  const sent = await sendOrderNotification(parsedOrder, customer, barista);
   if (sent) {
     db.update(orders).set({ notificationSent: true }).where(eq(orders.id, order.id)).run();
     parsedOrder.notificationSent = true;
@@ -78,12 +86,17 @@ export function listOrdersForUser(userId: number): OrderWithSyrups[] {
   return db.select().from(orders).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt)).all().map(withParsedSyrups);
 }
 
-export type OrderWithCustomer = OrderWithSyrups & { customerName: string; customerEmail: string };
+export type OrderWithCustomer = OrderWithSyrups & {
+  customerName: string;
+  customerEmail: string;
+  baristaName: string | null;
+};
 
 const orderColumns = {
   id: orders.id,
   userId: orders.userId,
   coffeeId: orders.coffeeId,
+  baristaId: orders.baristaId,
   coffeeNameSnapshot: orders.coffeeNameSnapshot,
   syrupNames: orders.syrupNames,
   sizeOz: orders.sizeOz,
@@ -95,17 +108,21 @@ const orderColumns = {
   createdAt: orders.createdAt,
 };
 
+const baristas = alias(users, "baristas");
+
 export function listAllOrders(): OrderWithCustomer[] {
   return db
-    .select({ ...orderColumns, customerName: users.name, customerEmail: users.email })
+    .select({ ...orderColumns, customerName: users.name, customerEmail: users.email, baristaName: baristas.name })
     .from(orders)
     .innerJoin(users, eq(orders.userId, users.id))
+    .leftJoin(baristas, eq(orders.baristaId, baristas.id))
     .orderBy(desc(orders.createdAt))
     .all()
-    .map(({ customerName, customerEmail, ...order }) => ({
+    .map(({ customerName, customerEmail, baristaName, ...order }) => ({
       ...withParsedSyrups(order),
       customerName,
       customerEmail,
+      baristaName: baristaName ?? null,
     }));
 }
 

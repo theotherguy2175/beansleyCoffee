@@ -9,6 +9,10 @@ export const users = sqliteTable("users", {
   role: text("role", { enum: ["admin", "staff", "customer"] })
     .notNull()
     .default("customer"),
+  // Only meaningful for admin/staff — whether this person currently shows up
+  // as a choosable barista on the order form. Orthogonal to role: role gates
+  // permissions, this just gates the picker/notification routing.
+  isBarista: integer("is_barista", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(current_timestamp)`),
@@ -78,6 +82,9 @@ export const orders = sqliteTable("orders", {
   coffeeId: integer("coffee_id")
     .notNull()
     .references(() => coffees.id),
+  // Nullable so pre-existing orders (from before baristas existed) stay
+  // valid — new orders always set this via the required order-form field.
+  baristaId: integer("barista_id").references(() => users.id),
   coffeeNameSnapshot: text("coffee_name_snapshot").notNull(),
   syrupNames: text("syrup_names"), // JSON-encoded string[]
   sizeOz: integer("size_oz"),
