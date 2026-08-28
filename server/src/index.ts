@@ -67,5 +67,5 @@ if (fs.existsSync(clientDist)) {
 app.use(errorHandler);
 
 app.listen(env.PORT, () => {
-  console.log(`beansleyCoffee server listening on :${env.PORT} (${env.NODE_ENV}) [pipeline-test-2026-08-24]`);
+  console.log(`beansleyCoffee server listening on :${env.PORT} (${env.NODE_ENV}) [pipeline-test-2026-08-28]`);
 });
