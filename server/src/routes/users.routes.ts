@@ -71,9 +71,21 @@ usersRouter.put(
       if (existing && existing.id !== id) throw new HttpError(409, "An account with that email already exists");
     }
 
-    // Customers can never be baristas, regardless of what's sent.
+    // Customers can never be baristas, regardless of what's sent. Promoting
+    // someone from customer to admin/staff defaults them to active (same as
+    // creating a new admin/staff account), unless isBarista was explicitly
+    // sent. Any other update (no role change, or already admin/staff) leaves
+    // isBarista untouched when not explicitly sent — an unrelated edit like
+    // changing someone's name shouldn't silently flip their toggle back on.
     const effectiveRole = input.role ?? existingUser.role;
-    const isBarista = effectiveRole === "customer" ? false : input.isBarista;
+    let isBarista: boolean | undefined;
+    if (effectiveRole === "customer") {
+      isBarista = false;
+    } else if (input.isBarista !== undefined) {
+      isBarista = input.isBarista;
+    } else if (existingUser.role === "customer") {
+      isBarista = true;
+    }
 
     const user = db
       .update(users)
